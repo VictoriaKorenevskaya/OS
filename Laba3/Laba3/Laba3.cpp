@@ -1,5 +1,3 @@
-﻿// Laba3.cpp : Кореневская Виктория, 8 группа
- 
 #include <iostream>
 #include <windows.h>
 
