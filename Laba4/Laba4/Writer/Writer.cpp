@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ﻿#include <iostream>
+=======
+#include <iostream>
+>>>>>>> 93e8c58e5fc30470e41c5484de3cb24965e449c8
 #include <string>
 #include <windows.h>
 
