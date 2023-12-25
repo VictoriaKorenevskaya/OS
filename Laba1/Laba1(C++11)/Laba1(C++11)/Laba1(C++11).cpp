@@ -1,11 +1,9 @@
-﻿// Laba1(C++11).cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
-#include <iostream>
+﻿#include <iostream>
 #include <vector>
 #include <thread>
 #include <chrono>
 #include <Windows.h>
+
 using namespace std;
 
 struct Data {
