@@ -1,5 +1,3 @@
-﻿// koloc2.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -11,8 +9,6 @@ template <typename T>
 vector<T> removeDuplicates(vector<T>& input) {
 
     sort(input.begin(), input.end());
-
-    // Используем std::unique для удаления дубликатов
     auto it = unique(input.begin(), input.end());
 
     input.erase(it, input.end());

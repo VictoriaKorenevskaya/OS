@@ -125,7 +125,7 @@ int main()
         });
 
     cout << endl;
-    cout << "The number of integers in the first K elements array : ";
+    cout << "The number of integers in the first K elements array: ";
     cout << res;
 
     cout << endl;
