@@ -1,14 +1,10 @@
-﻿// Child.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
-
 #define _CDT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <conio.h>
 #include <sstream>
 #include <Windows.h>
-using namespace std;
 
+using namespace std;
 
 void BubbleSort(double arr[], int size) {
     for (int i = 0; i < size - 1; i++) {
