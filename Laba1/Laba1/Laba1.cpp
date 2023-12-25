@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-﻿#include <iostream>
-=======
 #include <iostream>
->>>>>>> e9219bce2b837fc5ac1cf05cbaf670ed8697a017
 #include <Windows.h>
 
 using namespace std;
