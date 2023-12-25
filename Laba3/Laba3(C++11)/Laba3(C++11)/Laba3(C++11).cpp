@@ -1,126 +1,140 @@
-// Laba3(C++11).cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
-#include <iostream>
-#include <vector>
-#include <memory>
-#include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <iostream>
+#include <vector>
+#include <thread>
 
 using namespace std;
 
-vector<double> inputArray, resultArray;
-int size_;
-int K = 0;
-double result = 0;
+mutex mut1, mut2;
+condition_variable cv;
+int K = -1;
+bool work_finish = false, count_element_finish = false;
 
-mutex cs;
-condition_variable WorkEvent;
-condition_variable CountElementEvent;
-
-void Work()
+void Work(int& K, int& size, vector<double>& input_array, vector<double>& result)
 {
-    unique_lock<mutex> lock(cs);
+    unique_lock<mutex> ul(mut1);
+
+    cv.wait(ul, [&] {
+        return K != -1;
+        });
+
     int count_ = 0;
-    for (int i = 0; i < size_; i++)
+
+    for (int i = 0; i < size; i++)
     {
-        if (inputArray[i] > 0)
+        if (input_array[i] > 0)
         {
-            resultArray[count_] = inputArray[i];
+            result[count_] = input_array[i];
             count_++;
+        }
+
+        if (K == count_)
+        {
+            break;
         }
     }
 
-    WorkEvent.notify_one(); // Notify once after processing all elements
-
-    for (int i = 0; i < size_; i++)
+    for (int i = 0; i < size; i++)
     {
-        if (inputArray[i] <= 0)
+        if (input_array[i] <= 0)
         {
-            resultArray[count_] = inputArray[i];
+            result[count_] = input_array[i];
             count_++;
         }
+
+        if (K == count_)
+        {
+            break;
+        }
     }
+
+    work_finish = true;
+    ul.unlock();
+    cv.notify_all();
+    return;
 }
 
-void CountElement()
+void CountElement(vector<double>& result, int& res)
 {
-    unique_lock<mutex> lock(cs);
-    WorkEvent.wait(lock, [&] { return resultArray.size() >= K; }); // Wait until WorkEvent is notified and resultArray has at least K elements
+    unique_lock<mutex> ul(mut1);
+
+    cv.wait(ul, [&] {
+        return work_finish;
+        });
 
     for (int i = 0; i < K; i++)
     {
-        int a = static_cast<int>(resultArray[i]);
-        if (a == resultArray[i])
+        int a = result[i];
+        if (a == result[i])
         {
-            result++;
+            res++;
         }
     }
 
-    CountElementEvent.notify_one();
+    count_element_finish = true;
+    ul.unlock();
+    cv.notify_all();
+
+    return;
 }
+
 
 int main()
 {
+    int size;
+
     cout << "Enter array size: ";
-    if (!(cin >> size_) || size_ <= 0)
-    {
-        cout << "Invalid array size. Exiting." << endl;
-        return 1;
-    }
+    cin >> size;
+    vector<double> input_array(size);
+    vector<double> result(size);
 
-    inputArray.resize(size_);
-    resultArray.resize(size_);
-
+    double a;
     cout << "Enter the elements of the array: ";
-    for (int i = 0; i < size_; i++)
+    for (int i = 0; i < size; i++)
     {
-        double a;
         cin >> a;
-        inputArray[i] = a;
+        input_array[i] = a;
     }
+    int res = 0;
+
+    thread t1(Work, ref(K), ref(size), ref(input_array), ref(result));
+    thread t2(CountElement, ref(result), ref(res));
 
     cout << "Enter the value of K: ";
-    if (!(cin >> K) || K <= 0 || K > size_)
+    cin >> K;
+
+    cv.notify_all();
+
+    unique_lock<mutex> ul(mut2);
+
+    cv.wait(ul, [&] {
+        return work_finish;
+        });
+
+    cout << "First K elements: ";
+    for (int i = 0; i < K; i++)
     {
-        cout << "Invalid value of K. Exiting." << endl;
-        return 1;
+        cout << result[i] << " ";
     }
 
-    thread workThread(Work);
-    thread countElementThread(CountElement);
+    cv.wait(ul, [&] {
+        return count_element_finish;
+        });
 
-    workThread.join();
+    cout << endl;
+    cout << "The number of integers in the first K elements array : ";
+    cout << res;
 
+    cout << endl;
+    cout << "Remaining elements: ";
+    for (int i = K; i < size; i++)
     {
-        // Acquire the lock before accessing shared variables
-        unique_lock<mutex> lock(cs);
-
-        cout << "First K elements: ";
-        for (int i = 0; i < K; i++)
-        {
-            cout << resultArray[i] << " ";
-        }
-
-        CountElementEvent.wait(lock);
-        cout << endl;
-        cout << "The number of integers in the first K elements array: " << result;
+        cout << input_array[i] << " ";
     }
 
-    countElementThread.join();
-
-    {
-        // Acquire the lock before accessing shared variables
-        unique_lock<mutex> lock(cs);
-
-        cout << endl;
-        cout << "Remaining elements: ";
-        for (int i = K; i < size_; i++)
-        {
-            cout << resultArray[i] << " ";
-        }
-    }
+    t1.join();
+    t2.join();
 
     return 0;
 }
