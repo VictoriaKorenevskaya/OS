@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-﻿#define _CRT_SECURE_NO_WARNINGS
-=======
 #define _CRT_SECURE_NO_WARNINGS
->>>>>>> 93e8c58e5fc30470e41c5484de3cb24965e449c8
 #include <iostream>
 #include <conio.h>
 #include <Windows.h>
